@@ -1,0 +1,262 @@
+version: '3.8'
+
+services:
+  # ========================
+  # API GATEWAY
+  # ========================
+  gateway:
+    image: nginx:alpine
+    container_name: hc-gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - patient-service
+      - doctor-service
+      - appointment-service
+      - admin-service
+      - notification-service
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  # ========================
+  # MESSAGE BROKER
+  # ========================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: hc-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================
+  # DATABASES
+  # ========================
+  patient-db:
+    image: mongo:7
+    container_name: hc-patient-db
+    environment:
+      MONGO_INITDB_DATABASE: patient_db
+    volumes:
+      - patient-data:/data/db
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  doctor-db:
+    image: mongo:7
+    container_name: hc-doctor-db
+    environment:
+      MONGO_INITDB_DATABASE: doctor_db
+    volumes:
+      - doctor-data:/data/db
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  appointment-db:
+    image: mongo:7
+    container_name: hc-appointment-db
+    environment:
+      MONGO_INITDB_DATABASE: appointment_db
+    volumes:
+      - appointment-data:/data/db
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  admin-db:
+    image: mongo:7
+    container_name: hc-admin-db
+    environment:
+      MONGO_INITDB_DATABASE: admin_db
+    volumes:
+      - admin-data:/data/db
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  notification-db:
+    image: mongo:7
+    container_name: hc-notification-db
+    environment:
+      MONGO_INITDB_DATABASE: notification_db
+    volumes:
+      - notification-data:/data/db
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  # ========================
+  # MICROSERVICES
+  # ========================
+  patient-service:
+    build:
+      context: ./services/patient-service
+      dockerfile: Dockerfile
+    container_name: hc-patient-service
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: 3001
+      MONGO_URI: mongodb://patient-db:27017/patient_db
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRE: ${JWT_EXPIRE}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+    depends_on:
+      patient-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  doctor-service:
+    build:
+      context: ./services/doctor-service
+      dockerfile: Dockerfile
+    container_name: hc-doctor-service
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: 3002
+      MONGO_URI: mongodb://doctor-db:27017/doctor_db
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRE: ${JWT_EXPIRE}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+    depends_on:
+      doctor-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  appointment-service:
+    build:
+      context: ./services/appointment-service
+      dockerfile: Dockerfile
+    container_name: hc-appointment-service
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: 3003
+      MONGO_URI: mongodb://appointment-db:27017/appointment_db
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRE: ${JWT_EXPIRE}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+      DOCTOR_SERVICE_URL: http://doctor-service:3002
+    depends_on:
+      appointment-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  admin-service:
+    build:
+      context: ./services/admin-service
+      dockerfile: Dockerfile
+    container_name: hc-admin-service
+    ports:
+      - "3004:3004"
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: 3004
+      MONGO_URI: mongodb://admin-db:27017/admin_db
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRE: ${JWT_EXPIRE}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+      DOCTOR_SERVICE_URL: http://doctor-service:3002
+      PATIENT_SERVICE_URL: http://patient-service:3001
+    depends_on:
+      admin-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    container_name: hc-notification-service
+    ports:
+      - "3005:3005"
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: 3005
+      MONGO_URI: mongodb://notification-db:27017/notification_db
+      JWT_SECRET: ${JWT_SECRET}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
+    depends_on:
+      notification-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+  # ========================
+  # FRONTEND
+  # ========================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hc-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
+    networks:
+      - healthcare-net
+    restart: unless-stopped
+
+# ========================
+# VOLUMES
+# ========================
+volumes:
+  patient-data:
+  doctor-data:
+  appointment-data:
+  admin-data:
+  notification-data:
+  rabbitmq-data:
+
+# ========================
+# NETWORKS
+# ========================
+networks:
+  healthcare-net:
+    driver: bridge
