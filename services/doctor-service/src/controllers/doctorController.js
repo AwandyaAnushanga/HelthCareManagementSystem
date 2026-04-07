@@ -89,7 +89,135 @@ exports.getAvailability = async (req, res, next) => {
   }
 };
 
-// Internal endpoint — called by Appointment Service
+// ─── Delete Availability for a Day ──────────────────────
+exports.deleteAvailability = async (req, res, next) => {
+  try {
+    const result = await Availability.findOneAndDelete({
+      doctorId: req.user.userId,
+      dayOfWeek: parseInt(req.params.dayOfWeek),
+    });
+
+    if (!result) {
+      return res.status(404).json({ error: 'No availability found for this day' });
+    }
+
+    publishEvent('availability.deleted', {
+      doctorId: req.user.userId,
+      dayOfWeek: parseInt(req.params.dayOfWeek),
+    });
+    res.json({ message: 'Availability removed' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ─── Add/Update Date-specific Override ──────────────────
+exports.addOverride = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const overrideDate = new Date(req.body.date);
+    const dayOfWeek = overrideDate.getDay();
+
+    const availability = await Availability.findOne({
+      doctorId: req.user.userId,
+      dayOfWeek,
+    });
+
+    if (!availability) {
+      return res.status(404).json({
+        error: 'No base availability set for this day of the week. Set weekly availability first.',
+      });
+    }
+
+    // Remove any existing override for the same date
+    availability.overrides = availability.overrides.filter(
+      (o) => o.date.toDateString() !== overrideDate.toDateString()
+    );
+
+    availability.overrides.push(req.body);
+    await availability.save();
+
+    res.json(availability);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ─── Remove a Date Override ─────────────────────────────
+exports.removeOverride = async (req, res, next) => {
+  try {
+    const result = await Availability.updateOne(
+      { doctorId: req.user.userId },
+      { $pull: { overrides: { _id: req.params.overrideId } } }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ error: 'Override not found' });
+    }
+
+    res.json({ message: 'Override removed' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ─── Generate Slots for a Specific Date ─────────────────
+exports.getSlots = async (req, res, next) => {
+  try {
+    const date = new Date(req.query.date);
+    if (isNaN(date.getTime())) {
+      return res.status(400).json({ error: 'Valid date query parameter is required' });
+    }
+
+    const dayOfWeek = date.getDay();
+    const availability = await Availability.findOne({
+      doctorId: req.params.doctorId,
+      dayOfWeek,
+      isAvailable: true,
+    });
+
+    if (!availability) {
+      return res.json({ slots: [], message: 'Doctor is not available on this day' });
+    }
+
+    const slots = availability.generateSlots(date);
+    res.json({ date: date.toISOString().split('T')[0], slots });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ─── Password Change ────────────────────────────────────
+exports.changePassword = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const doctor = await Doctor.findById(req.user.userId).select('+password');
+    if (!doctor) return res.status(404).json({ error: 'Doctor not found' });
+
+    const isMatch = await doctor.comparePassword(req.body.currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    doctor.password = req.body.newPassword;
+    await doctor.save();
+
+    publishEvent('doctor.password_changed', { doctorId: doctor._id });
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ─── Internal: called by Appointment Service ─────────────
 exports.checkSlotAvailability = async (req, res, next) => {
   try {
     const { doctorId, dayOfWeek, time } = req.query;
@@ -105,6 +233,35 @@ exports.checkSlotAvailability = async (req, res, next) => {
 
     const available = time >= slot.startTime && time < slot.endTime;
     res.json({ available, slot });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ─── Internal: called by Admin Service to verify doctor ──
+exports.verifyDoctor = async (req, res, next) => {
+  try {
+    const doctor = await Doctor.findByIdAndUpdate(
+      req.params.doctorId,
+      {
+        isVerified: req.body.isVerified,
+        verifiedAt: new Date(),
+        verifiedBy: req.body.verifiedBy || 'admin',
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+
+    publishEvent('doctor.verified', {
+      doctorId: doctor._id,
+      email: doctor.email,
+      name: `${doctor.firstName} ${doctor.lastName}`,
+    });
+
+    res.json(doctor);
   } catch (err) {
     next(err);
   }

@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const notificationRoutes = require('./routes/notificationRoutes');
+const templateRoutes = require('./routes/templateRoutes');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -17,6 +18,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/notifications/templates', templateRoutes);
 
 app.use(errorHandler);
 

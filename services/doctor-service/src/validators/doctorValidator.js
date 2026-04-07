@@ -22,4 +22,37 @@ const availabilityValidator = [
   body('slotDuration').optional().isInt({ min: 15, max: 120 }).withMessage('Slot 15-120 minutes'),
 ];
 
-module.exports = { registerValidator, loginValidator, availabilityValidator };
+const overrideValidator = [
+  body('date').isISO8601().withMessage('Valid date is required (ISO 8601)'),
+  body('isAvailable').isBoolean().withMessage('isAvailable must be true or false'),
+  body('reason').optional().trim().isLength({ max: 200 }).withMessage('Reason max 200 characters'),
+  body('startTime')
+    .optional()
+    .matches(/^\d{2}:\d{2}$/)
+    .withMessage('Start time format: HH:MM'),
+  body('endTime')
+    .optional()
+    .matches(/^\d{2}:\d{2}$/)
+    .withMessage('End time format: HH:MM'),
+];
+
+const changePasswordValidator = [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword')
+    .isLength({ min: 6 })
+    .withMessage('New password must be at least 6 characters')
+    .custom((value, { req }) => {
+      if (value === req.body.currentPassword) {
+        throw new Error('New password must differ from current password');
+      }
+      return true;
+    }),
+];
+
+module.exports = {
+  registerValidator,
+  loginValidator,
+  availabilityValidator,
+  overrideValidator,
+  changePasswordValidator,
+};

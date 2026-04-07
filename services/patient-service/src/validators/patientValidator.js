@@ -21,4 +21,17 @@ const updateProfileValidator = [
   body('phone').optional().trim().notEmpty(),
 ];
 
-module.exports = { registerValidator, loginValidator, updateProfileValidator };
+const changePasswordValidator = [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword')
+    .isLength({ min: 6 })
+    .withMessage('New password must be at least 6 characters')
+    .custom((value, { req }) => {
+      if (value === req.body.currentPassword) {
+        throw new Error('New password must differ from current password');
+      }
+      return true;
+    }),
+];
+
+module.exports = { registerValidator, loginValidator, updateProfileValidator, changePasswordValidator };
