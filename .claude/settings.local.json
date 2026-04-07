@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"require\\('./services/patient-service/src/middleware/auth'\\)\")",
+      "Bash(node -e \"require\\('./services/doctor-service/src/middleware/auth'\\)\")",
+      "Bash(node -e \"require\\('./services/admin-service/src/middleware/auth'\\)\")",
+      "Bash(node -e \"require\\('./services/appointment-service/src/middleware/auth'\\)\")",
+      "Bash(node -e \"require\\('./services/notification-service/src/middleware/auth'\\)\")",
+      "Bash(node --check services/patient-service/src/middleware/auth.js)",
+      "Bash(node --check services/doctor-service/src/middleware/auth.js)",
+      "Bash(node --check services/admin-service/src/middleware/auth.js)",
+      "Bash(node --check services/appointment-service/src/middleware/auth.js)",
+      "Bash(node --check services/notification-service/src/middleware/auth.js)",
+      "Bash(node --check services/patient-service/src/controllers/authController.js)",
+      "Bash(node --check services/doctor-service/src/controllers/authController.js)",
+      "Bash(node --check services/admin-service/src/controllers/authController.js)",
+      "Bash(node --check services/patient-service/src/routes/authRoutes.js)",
+      "Bash(node --check services/doctor-service/src/routes/authRoutes.js)"
+    ]
+  }
+}

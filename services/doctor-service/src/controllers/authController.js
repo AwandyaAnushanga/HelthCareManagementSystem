@@ -7,7 +7,7 @@ const generateToken = (doctor) => {
   return jwt.sign(
     { userId: doctor._id, email: doctor.email, role: 'doctor' },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE || '24h' }
+    { expiresIn: process.env.JWT_EXPIRE || '24h', issuer: 'healthcare-doctor-service' }
   );
 };
 
@@ -56,8 +56,22 @@ exports.login = async (req, res, next) => {
       return res.status(403).json({ error: 'Account is deactivated' });
     }
 
+    await doctor.updateOne({ $set: { lastLogin: new Date() } });
+
     const token = generateToken(doctor);
     res.json({ token, doctor });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getProfile = async (req, res, next) => {
+  try {
+    const doctor = await Doctor.findById(req.user.userId);
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+    res.json(doctor);
   } catch (err) {
     next(err);
   }
