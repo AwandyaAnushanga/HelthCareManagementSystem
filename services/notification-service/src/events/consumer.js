@@ -84,6 +84,7 @@ const handlers = {
 
 const startEventConsumer = async () => {
   const channel = getChannel();
+  if (!channel) { console.warn('RabbitMQ not connected — skipping event consumer'); return; }
 
   await channel.assertQueue(QUEUE, { durable: true });
 

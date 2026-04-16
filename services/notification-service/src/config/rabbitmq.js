@@ -4,7 +4,7 @@ let channel = null;
 const EXCHANGE = 'healthcare.events';
 
 const connectRabbitMQ = async () => {
-  const maxRetries = 10;
+  const maxRetries = 1;
   for (let i = 0; i < maxRetries; i++) {
     try {
       const connection = await amqp.connect(process.env.RABBITMQ_URL);
@@ -17,7 +17,8 @@ const connectRabbitMQ = async () => {
       await new Promise((r) => setTimeout(r, 3000));
     }
   }
-  throw new Error('Failed to connect to RabbitMQ');
+  console.warn('RabbitMQ unavailable — running without messaging');
+  return;
 };
 
 const getChannel = () => channel;

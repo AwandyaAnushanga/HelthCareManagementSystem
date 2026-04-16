@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import NotificationBell from '../notifications/NotificationBell';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -11,12 +12,6 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const getDashboardLink = () => {
-    if (!user) return '/';
-    const role = JSON.parse(localStorage.getItem('user'))?.role || user.role;
-    return `/${role}/dashboard`;
-  };
-
   return (
     <nav className="navbar">
       <div className="navbar-brand">
@@ -25,8 +20,19 @@ const Navbar = () => {
       <div className="navbar-links">
         {user ? (
           <>
-            <Link to={getDashboardLink()}>Dashboard</Link>
-            <Link to="/book-appointment">Book Appointment</Link>
+            <Link to={`/${user.role}/dashboard`}>Dashboard</Link>
+
+            {user.role === 'patient' && (
+              <Link to="/book-appointment">Book Appointment</Link>
+            )}
+
+            {user.role === 'doctor' && (
+              <Link to="/doctor/dashboard">My Schedule</Link>
+            )}
+
+            <NotificationBell />
+
+            <span className="user-info">{user.firstName || user.email}</span>
             <button onClick={handleLogout} className="btn-logout">Logout</button>
           </>
         ) : (

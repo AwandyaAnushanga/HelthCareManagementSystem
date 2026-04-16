@@ -10,7 +10,7 @@ const bookValidator = [
 ];
 
 const statusValidator = [
-  body('status').isIn(['confirmed', 'cancelled', 'completed', 'no-show']).withMessage('Invalid status'),
+  body('status').isIn(['confirmed', 'cancelled', 'completed', 'no-show', 'in-progress']).withMessage('Invalid status'),
 ];
 
 const videoLinkValidator = [

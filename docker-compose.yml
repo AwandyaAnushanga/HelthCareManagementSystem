@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ========================
   # API GATEWAY
@@ -191,6 +189,7 @@ services:
       RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
       DOCTOR_SERVICE_URL: http://doctor-service:3002
       PATIENT_SERVICE_URL: http://patient-service:3001
+      APPOINTMENT_SERVICE_URL: http://appointment-service:3003
     depends_on:
       admin-db:
         condition: service_started

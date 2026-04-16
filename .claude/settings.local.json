@@ -15,7 +15,21 @@
       "Bash(node --check services/doctor-service/src/controllers/authController.js)",
       "Bash(node --check services/admin-service/src/controllers/authController.js)",
       "Bash(node --check services/patient-service/src/routes/authRoutes.js)",
-      "Bash(node --check services/doctor-service/src/routes/authRoutes.js)"
+      "Bash(node --check services/doctor-service/src/routes/authRoutes.js)",
+      "Bash(npx --yes acorn-jsx)",
+      "Bash(npx --yes acorn --help)",
+      "Bash(npm install:*)",
+      "Bash(npx react-scripts:*)",
+      "Bash(docker --version)",
+      "Bash(docker compose:*)",
+      "Bash(docker info:*)",
+      "Bash(docker system:*)",
+      "Bash(wsl --shutdown)",
+      "Bash(wsl --list --verbose)",
+      "Bash(wsl --unregister docker-desktop)",
+      "Bash(wsl -l -v)",
+      "Bash(docker image *)",
+      "Bash(taskkill //F //IM node.exe)"
     ]
   }
 }

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { patientApi, doctorApi, adminApi } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -24,7 +25,21 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Call backend logout to blacklist token
+    try {
+      const role = user?.role;
+      const logoutMap = {
+        patient: () => patientApi.post('/api/patients/auth/logout'),
+        doctor: () => doctorApi.post('/api/doctors/auth/logout'),
+        admin: () => adminApi.post('/api/admin/auth/logout'),
+      };
+      if (role && logoutMap[role]) {
+        await logoutMap[role]();
+      }
+    } catch {
+      // Proceed with local logout even if server call fails
+    }
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
