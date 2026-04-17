@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import patientService from '../../services/patientService';
+import appointmentService from '../../services/appointmentService';
+import { useAuth } from '../../context/AuthContext';
 import { formatDate } from '../../utils/formatDate';
 
 const FREQUENCIES = [
@@ -21,14 +23,18 @@ const FREQUENCIES = [
 const emptyMedication = { name: '', dosage: '', frequency: 'once_daily', duration: { value: 7, unit: 'days' }, instructions: '' };
 
 const DoctorPrescriptions = () => {
+  const { user } = useAuth();
   const [prescriptions, setPrescriptions] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({});
 
+  const doctorName = user ? `${user.firstName} ${user.lastName}` : '';
+
   const [form, setForm] = useState({
-    patientId: '', patientName: '', doctorName: '', diagnosis: '', validUntil: '',
+    patientId: '', patientName: '', doctorName: doctorName, diagnosis: '', validUntil: '',
     medications: [{ ...emptyMedication }],
     notes: '',
   });
@@ -46,7 +52,29 @@ const DoctorPrescriptions = () => {
     }
   };
 
-  useEffect(() => { fetchPrescriptions(); }, [page]);
+  const fetchPatients = async () => {
+    try {
+      const { data } = await appointmentService.getDoctorAppointments({ limit: 100 });
+      const appointments = data.appointments || [];
+      const uniquePatients = [];
+      const seen = new Set();
+      appointments.forEach((apt) => {
+        if (!seen.has(apt.patientId)) {
+          seen.add(apt.patientId);
+          uniquePatients.push({ id: apt.patientId, name: apt.patientName });
+        }
+      });
+      setPatients(uniquePatients);
+    } catch (err) {
+      console.error('Failed to load patients from appointments');
+    }
+  };
+
+  useEffect(() => { fetchPrescriptions(); fetchPatients(); }, [page]);
+
+  useEffect(() => {
+    if (doctorName) setForm((prev) => ({ ...prev, doctorName }));
+  }, [doctorName]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -91,11 +119,22 @@ const DoctorPrescriptions = () => {
       {showForm && (
         <form onSubmit={handleSubmit} className="profile-form" style={{ background: 'white', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
           <div className="form-row">
-            <div className="form-group"><label>Patient ID *</label><input name="patientId" value={form.patientId} onChange={handleChange} required placeholder="MongoDB ObjectId" /></div>
-            <div className="form-group"><label>Patient Name *</label><input name="patientName" value={form.patientName} onChange={handleChange} required /></div>
+            <div className="form-group">
+              <label>Patient *</label>
+              <select name="patientId" value={form.patientId} onChange={(e) => {
+                const selected = patients.find((p) => p.id === e.target.value);
+                setForm({ ...form, patientId: e.target.value, patientName: selected ? selected.name : '' });
+              }} required>
+                <option value="">-- Select Patient --</option>
+                {patients.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group"><label>Patient Name</label><input name="patientName" value={form.patientName} readOnly style={{ background: '#f1f5f9', cursor: 'not-allowed' }} /></div>
           </div>
           <div className="form-row">
-            <div className="form-group"><label>Doctor Name *</label><input name="doctorName" value={form.doctorName} onChange={handleChange} required /></div>
+            <div className="form-group"><label>Doctor Name</label><input name="doctorName" value={form.doctorName} readOnly style={{ background: '#f1f5f9', cursor: 'not-allowed' }} /></div>
             <div className="form-group"><label>Valid Until *</label><input type="date" name="validUntil" value={form.validUntil} onChange={handleChange} required /></div>
           </div>
           <div className="form-group"><label>Diagnosis *</label><input name="diagnosis" value={form.diagnosis} onChange={handleChange} required maxLength={500} /></div>

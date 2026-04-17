@@ -16,21 +16,41 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background: #2563eb;
+  padding: 0 2rem;
+  height: 60px;
+  background: #1e293b;
   color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
-.navbar a { color: white; text-decoration: none; margin: 0 0.75rem; }
-.navbar-links { display: flex; align-items: center; gap: 0.5rem; }
-.btn-logout { background: transparent; border: 1px solid white; color: white; padding: 0.4rem 1rem; border-radius: 4px; cursor: pointer; }
+.navbar a { color: white; text-decoration: none; }
+.navbar-left { display: flex; align-items: center; gap: 2rem; }
+.navbar-right { display: flex; align-items: center; gap: 1rem; }
+.navbar-brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.15rem; color: white !important; }
+.brand-icon { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: #2563eb; border-radius: 6px; font-size: 1.2rem; font-weight: 700; }
+.brand-text { letter-spacing: -0.3px; }
+.nav-links { display: flex; align-items: center; gap: 0.25rem; }
+.nav-link { padding: 0.5rem 0.9rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; color: rgba(255,255,255,0.7) !important; transition: all 0.2s; }
+.nav-link:hover { color: white !important; background: rgba(255,255,255,0.1); }
+.nav-link.active { color: white !important; background: rgba(255,255,255,0.15); }
+.user-menu { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.08); }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; }
+.user-name { font-size: 0.9rem; font-weight: 500; }
+.user-role { font-size: 0.7rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; }
+.btn-logout { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
+.btn-logout:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+.btn-register { padding: 0.5rem 1.2rem; background: #2563eb; color: white !important; border-radius: 6px; font-weight: 500; font-size: 0.9rem; transition: background 0.2s; }
+.btn-register:hover { background: #1d4ed8; }
 
 /* Main Content */
 .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
 
 /* Buttons */
-.btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; border: none; cursor: pointer; font-size: 0.95rem; }
-.btn-primary { background: #2563eb; color: white; }
-.btn-secondary { background: #2563eb; color: white; }
+.btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; border: none; cursor: pointer; font-size: 0.95rem; color: white !important; }
+.btn-primary { background: #1e293b; color: white; }
+.btn-secondary { background: #1e293b; color: #ffffff !important; font-weight: 500; }
 .btn-success { background: #16a34a; color: white; }
 .btn-danger { background: #dc2626; color: white; }
 .btn-info { background: #0891b2; color: white; }
@@ -40,11 +60,11 @@ body {
 .auth-page h2 { margin-bottom: 1.5rem; text-align: center; }
 .auth-form { display: flex; flex-direction: column; gap: 0.8rem; }
 .auth-form input, .auth-form select { padding: 0.7rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95rem; }
-.auth-form button { padding: 0.8rem; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+.auth-form button { padding: 0.8rem; background: #1e293b; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
 .auth-form button:disabled { opacity: 0.6; }
 .role-toggle { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
 .role-toggle button { flex: 1; padding: 0.5rem; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer; }
-.role-toggle button.active { background: #2563eb; color: white; border-color: #2563eb; }
+.role-toggle button.active { background: #1e293b; color: white; border-color: #1e293b; }
 
 /* Dashboard */
 .dashboard { padding: 1rem 0; }
@@ -55,7 +75,7 @@ body {
 .appointment-list { display: grid; gap: 1rem; }
 .appointment-card { padding: 1.2rem; background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 .appointment-card h3 { margin-bottom: 0.3rem; }
-.appointment-card a { color: #2563eb; text-decoration: none; display: block; margin-top: 0.5rem; }
+.appointment-card a { color: #1e293b; text-decoration: none; display: block; margin-top: 0.5rem; }
 .action-buttons { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 
 /* Status Badges */
@@ -68,14 +88,14 @@ body {
 /* Doctor Grid */
 .doctor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin: 1rem 0; }
 .doctor-card { padding: 1rem; background: white; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: border-color 0.2s; }
-.doctor-card:hover { border-color: #2563eb; }
-.doctor-card.selected { border-color: #2563eb; background: #eff6ff; }
+.doctor-card:hover { border-color: #1e293b; }
+.doctor-card.selected { border-color: #1e293b; background: #f1f5f9; }
 
 /* Booking Form */
 .booking-form { display: flex; flex-direction: column; gap: 0.8rem; max-width: 500px; margin-top: 1.5rem; }
 .booking-form input, .booking-form select, .booking-form textarea { padding: 0.7rem; border: 1px solid #d1d5db; border-radius: 6px; }
 .booking-form textarea { min-height: 100px; resize: vertical; }
-.booking-form button { padding: 0.8rem; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; }
+.booking-form button { padding: 0.8rem; background: #1e293b; color: white; border: none; border-radius: 6px; cursor: pointer; }
 
 /* Notifications */
 .notification-bell { position: relative; }
@@ -83,7 +103,7 @@ body {
 .badge { background: #dc2626; color: white; border-radius: 50%; padding: 0.1rem 0.4rem; font-size: 0.75rem; margin-left: 0.3rem; }
 .notification-dropdown { position: absolute; right: 0; top: 100%; width: 350px; max-height: 400px; overflow-y: auto; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 100; }
 .dropdown-header { display: flex; justify-content: space-between; padding: 0.8rem; border-bottom: 1px solid #e5e7eb; }
-.mark-all-read { background: none; border: none; color: #2563eb; cursor: pointer; font-size: 0.85rem; }
+.mark-all-read { background: none; border: none; color: #1e293b; cursor: pointer; font-size: 0.85rem; }
 .notification-dropdown ul { list-style: none; }
 .notification-dropdown li { padding: 0.8rem; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
 .notification-dropdown li.unread { background: #eff6ff; }
@@ -131,8 +151,8 @@ body {
 /* Tabs */
 .tab-nav { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 1.5rem; }
 .tab-btn { padding: 0.75rem 1.5rem; border: none; background: none; cursor: pointer; font-size: 0.95rem; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
-.tab-btn:hover { color: #2563eb; }
-.tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+.tab-btn:hover { color: #1e293b; }
+.tab-btn.active { color: #1e293b; border-bottom-color: #1e293b; font-weight: 600; }
 .tab-content { min-height: 300px; }
 
 /* Section Headers */
@@ -178,10 +198,10 @@ body {
 
 /* Medications */
 .medications-list { display: grid; gap: 0.75rem; }
-.medication-card { background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 3px solid #2563eb; }
+.medication-card { background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 3px solid #1e293b; }
 .med-header { display: flex; justify-content: space-between; align-items: center; }
 .med-header h4 { margin: 0; }
-.med-dosage { font-weight: 600; color: #2563eb; }
+.med-dosage { font-weight: 600; color: #1e293b; }
 .med-generic { color: #64748b; font-size: 0.85rem; }
 .med-details { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0.5rem 0; font-size: 0.85rem; color: #475569; }
 .med-instructions { font-style: italic; color: #475569; }
@@ -198,7 +218,7 @@ body {
 .search-input { width: 100%; max-width: 400px; padding: 0.7rem; border: 1px solid #d1d5db; border-radius: 6px; margin-bottom: 1rem; }
 
 /* Small buttons */
-.btn-sm { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+.btn-sm { padding: 0.4rem 1rem; font-size: 0.85rem; font-weight: 500; }
 
 /* Availability */
 .availability-section { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
@@ -218,8 +238,8 @@ body {
 .slot-picker { margin: 1rem 0; }
 .slots-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
 .slot-btn { padding: 0.5rem 1rem; border: 2px solid #d1d5db; border-radius: 6px; background: white; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
-.slot-btn:hover { border-color: #2563eb; color: #2563eb; }
-.slot-btn.selected { background: #2563eb; color: white; border-color: #2563eb; }
+.slot-btn:hover { border-color: #1e293b; color: #1e293b; }
+.slot-btn.selected { background: #1e293b; color: white; border-color: #1e293b; }
 .slot-message { color: #64748b; font-style: italic; margin-top: 0.5rem; }
 
 /* Booking Steps */
@@ -247,7 +267,7 @@ body {
 .stat-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center; }
 .stat-card h3 { font-size: 2rem; color: #1e293b; margin-bottom: 0.3rem; }
 .stat-card p { color: #64748b; font-size: 0.9rem; }
-.stat-highlight { border-left: 4px solid #2563eb; }
+.stat-highlight { border-left: 4px solid #1e293b; }
 
 /* Recent Events */
 .recent-events { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -277,7 +297,7 @@ body {
 .role-select { padding: 0.4rem; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.8rem; }
 
 /* Doctor Card - additional */
-.doc-spec { color: #2563eb; font-weight: 500; }
+.doc-spec { color: #1e293b; font-weight: 500; }
 .doc-rating { font-size: 0.85rem; color: #f59e0b; }
 .doctor-bio { margin-top: 0.5rem; color: #475569; line-height: 1.5; }
 

@@ -64,7 +64,7 @@ exports.rejectDoctor = async (req, res, next) => {
 exports.getDoctors = async (req, res, next) => {
   try {
     const { data } = await axios.get(`${DOCTOR_SERVICE_URL}/api/doctors`, {
-      params: req.query,
+      params: { ...req.query, includeAll: 'true' },
     });
     res.json(data);
   } catch (err) {

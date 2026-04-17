@@ -1,44 +1,62 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import NotificationBell from '../notifications/NotificationBell';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
+
   return (
     <nav className="navbar">
-      <div className="navbar-brand">
-        <Link to="/">Healthcare Platform</Link>
-      </div>
-      <div className="navbar-links">
-        {user ? (
-          <>
-            <Link to={`/${user.role}/dashboard`}>Dashboard</Link>
+      <div className="navbar-left">
+        <Link to="/" className="navbar-brand">
+          <span className="brand-icon">+</span>
+          <span className="brand-text">HealthCare</span>
+        </Link>
+
+        {user && (
+          <div className="nav-links">
+            <Link to={`/${user.role}/dashboard`} className={`nav-link ${isActive(`/${user.role}/dashboard`) ? 'active' : ''}`}>
+              Dashboard
+            </Link>
 
             {user.role === 'patient' && (
-              <Link to="/book-appointment">Book Appointment</Link>
+              <Link to="/book-appointment" className={`nav-link ${isActive('/book-appointment') ? 'active' : ''}`}>
+                Book Appointment
+              </Link>
             )}
 
             {user.role === 'doctor' && (
-              <Link to="/doctor/dashboard">My Schedule</Link>
+              <Link to="/doctor/dashboard" className={`nav-link ${isActive('/doctor/dashboard') ? 'active' : ''}`}>
+                My Schedule
+              </Link>
             )}
+          </div>
+        )}
+      </div>
 
-            <NotificationBell />
-
-            <span className="user-info">{user.firstName || user.email}</span>
+      <div className="navbar-right">
+        {user ? (
+          <>
+            <div className="user-menu">
+              <div className="user-avatar">{user.firstName?.charAt(0)?.toUpperCase() || 'U'}</div>
+              <span className="user-name">{user.firstName || user.email}</span>
+              <span className="user-role">{user.role}</span>
+            </div>
             <button onClick={handleLogout} className="btn-logout">Logout</button>
           </>
         ) : (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
+            <Link to="/login" className="nav-link">Login</Link>
+            <Link to="/register" className="btn-register">Register</Link>
           </>
         )}
       </div>

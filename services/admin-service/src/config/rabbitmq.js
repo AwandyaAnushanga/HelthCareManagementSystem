@@ -21,6 +21,14 @@ const connectRabbitMQ = async () => {
   return;
 };
 
+const publishEvent = (routingKey, data) => {
+  if (!channel) { console.warn('RabbitMQ not connected — skipping event:', routingKey); return; }
+  channel.publish(EXCHANGE, routingKey, Buffer.from(JSON.stringify(data)), {
+    persistent: true,
+  });
+  console.log(`Event published: ${routingKey}`);
+};
+
 const getChannel = () => channel;
 
-module.exports = { connectRabbitMQ, getChannel, EXCHANGE };
+module.exports = { connectRabbitMQ, publishEvent, getChannel, EXCHANGE };

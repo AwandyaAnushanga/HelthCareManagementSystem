@@ -44,8 +44,11 @@ const requirePermission = (...permissions) => {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
-    const userPermissions = req.user.permissions || {};
-    const hasPermission = permissions.every((perm) => userPermissions[perm] === true);
+    const userPermissions = req.user.permissions || [];
+    // Support both array and object formats
+    const hasPermission = Array.isArray(userPermissions)
+      ? permissions.every((perm) => userPermissions.includes(perm))
+      : permissions.every((perm) => userPermissions[perm] === true);
 
     if (!hasPermission) {
       return res.status(403).json({

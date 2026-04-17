@@ -29,8 +29,8 @@ exports.updateProfile = async (req, res, next) => {
 
 exports.getAllDoctors = async (req, res, next) => {
   try {
-    const { specialization, page = 1, limit = 10 } = req.query;
-    const filter = { isVerified: true, isActive: true };
+    const { specialization, page = 1, limit = 10, includeAll } = req.query;
+    const filter = includeAll === 'true' ? {} : { isVerified: true, isActive: true };
     if (specialization) filter.specialization = new RegExp(specialization, 'i');
 
     const doctors = await Doctor.find(filter)
